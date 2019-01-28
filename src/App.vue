@@ -2,7 +2,6 @@
   <div id="app">
     <div class="table">
       <el-table :data="tableData" style="width: 100%" stripe>
-        <el-table-column prop="idx" label="Index" width="70"></el-table-column>
         <el-table-column prop="firstName" label="First Name"></el-table-column>
         <el-table-column prop="lastName" label="Last Name"></el-table-column>
         <el-table-column prop="phoneNumber" label="Phone Number"></el-table-column>
@@ -11,13 +10,6 @@
         <el-table-column prop="state" label="State" width="70"></el-table-column>
         <el-table-column prop="zipCode" label="Zip Code" width="100"></el-table-column>
       </el-table>
-    </div>
-    <div class="overlay" v-if="tableData.length > 0">
-      <span># of rows: {{ tableData.length }}</span>
-      <br>
-      <span>page number: {{ pageNumber }}</span>
-      <br>
-      <span>index range: {{ beginningIndex }} - {{ endingIndex }}</span>
     </div>
   </div>
 </template>
@@ -33,9 +25,6 @@ export default {
       isScrolling: null,
       scrollToRow: null,
       rowsInView: 0,
-      currentIdx: 0,
-      beginningIndex: 0,
-      endingIndex: 0,
       scrollIntoViewOptions: {
         behavior: "auto",
         block: "end",
@@ -53,38 +42,35 @@ export default {
       // return fetch(`http://localhost:3000/1000/50/${this.pageNumber}`)
       .then(x => x.json())
       .then(x => {
+        if (x.length === 0) {
+          this.$notify({
+            message: 'There is no more data',
+            duration: 2000
+          });
+        }
         if (direction === 'previous') {
-          if (this.currentIdx === 0) {
-            x.forEach(a => {
-              a['idx'] = this.currentIdx;
-              this.currentIdx++;
+          if (this.pageNumber === 1) {
+            this.$notify({
+              title: 'Calm down',
+              message: `You've reached the beginning.`
             });
-          } 
-          if (this.pageNumber >= 3) {
+          }
+          if (this.pageNumber > 1) {
             this.removeData();
-            this.endingIndex = this.tableData[this.tableData.length - 1].idx;
-            this.beginningIndex = this.tableData[0].idx;
-            this.currentIdx = this.tableData[0].idx;
-            let tempIdx = this.beginningIndex;
-            for (let i = x.length - 1; i >= 0; i--) {
-              tempIdx--;
-              x[i]['idx'] = tempIdx;
-            }
             this.tableData.unshift(...x);
-            this.beginningIndex = this.tableData[0].idx;
-            this.currentIdx = this.tableData[0].idx;
             this.rowsInView = document.getElementsByClassName('el-table__row');
-            this.getScrollToRow(direction);
+            this.scrollToRow = this.getScrollToRow(direction);
+            this.scrollToRow.classList.add('placeholder');
+            this.pageNumber--;
+            this.$notify({
+              message: `Page ${this.pageNumber} loaded.`,
+              position: 'top-right',
+              duration: 2000
+            })
           }
         }
         if (direction === 'next') {
-        x.forEach(a => {
-          a['idx'] = this.currentIdx;
-          this.currentIdx++;
-        });
         this.tableData.push(...x);
-        this.beginningIndex = this.tableData[0].idx;
-        this.endingIndex = this.tableData[this.tableData.length - 1].idx;
         this.rowsInView = document.getElementsByClassName('el-table__row');
         window.clearTimeout(this.isScrolling);
         }
@@ -106,6 +92,11 @@ export default {
     loadNextData: function () {
       if (this.tableData.length > 49) {
         this.pageNumber++;
+        this.$notify({
+          message: `Page ${this.pageNumber} loaded`,
+          position: 'bottom-right',
+          duration: 2000
+        })
         this.loadData('next');
         window.clearTimeout(this.isScrolling);
       }
@@ -118,7 +109,6 @@ export default {
     },
     removeData: function () {
       this.tableData.splice(0, 50);
-      this.beginningIndex = this.tableData[0].idx;
       this.scrollToRow = this.getScrollToRow();
       if (this.scrollToRow) {
         this.scrollToRow.scrollIntoView(this.scrollIntoViewOptions);
@@ -128,7 +118,7 @@ export default {
     getScrollToRow: function (direction) {
       let a;
       if (direction === 'previous') {
-        a = 0;
+        return this.rowsInView[0];
       }
       if (direction === 'next') {
         a = this.rowsInView.length <= 150 ? 50 : 100;
