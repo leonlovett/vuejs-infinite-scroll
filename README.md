@@ -1,8 +1,22 @@
-# tasky
+# VueJs Infinite Scroll
 
 ## Project setup
 ```
+cd fake-data
 npm install
+
+cd ../
+npm install
+```
+### Start data server
+```
+cd ../fake-data
+node index.js
+```
+### Setup front end to use local server
+```
+In src/App.vue
+comment out line 50 and uncomment line 51
 ```
 
 ### Compiles and hot-reloads for development
