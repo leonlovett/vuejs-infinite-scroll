@@ -162,22 +162,4 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
-.overlay {
-  background-color: white;
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 300px;
-  font-size: 26px;
-  border-radius: 3px;
-  padding: 10px 0;
-  border: 1px solid black;
-  opacity: 0.7;
-}
-span {
-  margin: 10px 0;
-}
-.placeholder {
-  background-color: rgba(239, 242, 10, 0.09) !important;
-}
 </style>
