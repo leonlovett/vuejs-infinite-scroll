@@ -13,12 +13,18 @@ npm install
 cd ../fake-data
 node index.js
 ```
-### Setup front end to use local server
+### Configuration Options
 ```
-In src/App.vue
-comment out line 50 and uncomment line 51
-```
+maxPages: the maximum number of pages on the screen at one time.(default: 3)
 
+pageSize: the maximum number of rows per page. (default: 50)
+
+dataSource: a link or reference to the data source for the table.
+
+scrollStopDelay: the number of milliseconds to wait to load more data after the user has stopped scrolling. (default: 200)
+
+offsetDistance: the distance in px from the bottom of the page to load the next page. (default: 200px)
+```
 ### Compiles and hot-reloads for development
 ```
 npm run serve

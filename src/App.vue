@@ -29,7 +29,9 @@ export default {
       startPage: 1,
       endPage: 1,
       pageSize: 50,
-      apiUrl: 'https://us-central1-infinite-scroll-vuejs.cloudfunctions.net/getData',
+      dataSource: 'https://us-central1-infinite-scroll-vuejs.cloudfunctions.net/getData',
+      scrollStopDelay: 200,
+      offsetDistance: 200,
       scrollIntoViewOptions: {
         behavior: "auto",
         block: "end",
@@ -43,7 +45,7 @@ export default {
   },
   methods: {
     loadData: function(direction) {
-      return fetch(this.apiUrl)
+      return fetch(this.dataSource)
       .then(x => x.json())
       .then(x => {
         if (x.length === 0) {
@@ -137,9 +139,9 @@ export default {
       window.addEventListener('scroll', event => {
         window.clearTimeout(this.isScrolling);
         this.isScrolling = setTimeout(() => {
-          const scrollPos = Math.ceil(document.documentElement.scrollTop + window.innerHeight);
+          const scrollPos = Math.ceil(document.documentElement.scrollTop + window.innerHeight) + this.offsetDistance;
           const screenHeight = document.documentElement.offsetHeight;
-          const bottomOfWindow = scrollPos === screenHeight;
+          const bottomOfWindow = scrollPos >= screenHeight;
           if (bottomOfWindow === true) {
             this.loadNextData();
             window.clearTimeout(this.isScrolling);
@@ -147,7 +149,7 @@ export default {
           if (document.documentElement.scrollTop === 0) {
             this.loadPreviousData();
           }
-        }, 200, this.isScrolling);
+        }, this.scrollStopDelay);
       });
     }
   }
