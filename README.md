@@ -21,7 +21,8 @@ pageSize: the maximum number of rows per page. (default: 50)
 
 dataSource: a link or reference to the data source for the table.
 
-scrollStopDelay: the number of milliseconds to wait to load more data after the user has stopped scrolling. (default: 200)
+scrollStopDelay: the number of milliseconds to wait to load more data after the user has stopped
+scrolling. (default: 200)
 
 offsetDistance: the distance in px from the bottom of the page to load the next page. (default: 200px)
 ```
