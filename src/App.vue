@@ -25,6 +25,11 @@ export default {
       isScrolling: null,
       scrollToRow: null,
       rowsInView: 0,
+      maxPages: 3,
+      startPage: 1,
+      endPage: 1,
+      pageSize: 50,
+      apiUrl: 'https://us-central1-infinite-scroll-vuejs.cloudfunctions.net/getData',
       scrollIntoViewOptions: {
         behavior: "auto",
         block: "end",
@@ -33,13 +38,12 @@ export default {
     };
   },
   mounted() {
-    this.loadData('next');
+    this.loadData('initial');
     this.scrollStop();
   },
   methods: {
     loadData: function(direction) {
-      return fetch('https://us-central1-infinite-scroll-vuejs.cloudfunctions.net/getData')
-      // return fetch(`http://localhost:3000/1000/50/${this.pageNumber}`)
+      return fetch(this.apiUrl)
       .then(x => x.json())
       .then(x => {
         if (x.length === 0) {
@@ -48,29 +52,20 @@ export default {
             duration: 2000
           });
         }
+        if (direction === 'initial') {
+          this.tableData.push(...x);
+        }
         if (direction === 'previous') {
-          if (this.pageNumber === 1) {
-            this.$notify({
-              title: 'Calm down',
-              message: `You've reached the beginning.`
-            });
-          }
-          if (this.pageNumber > 1) {
-            this.removeData();
+          if (this.startPage > 1) {
+            this.removeData(direction);
             this.tableData.unshift(...x);
             this.rowsInView = document.getElementsByClassName('el-table__row');
             this.scrollToRow = this.getScrollToRow(direction);
-            this.scrollToRow.classList.add('placeholder');
-            this.pageNumber--;
-            this.$notify({
-              message: `Page ${this.pageNumber} loaded.`,
-              position: 'top-right',
-              duration: 2000
-            })
           }
         }
         if (direction === 'next') {
         this.tableData.push(...x);
+        this.endPage++;
         this.rowsInView = document.getElementsByClassName('el-table__row');
         window.clearTimeout(this.isScrolling);
         }
@@ -79,40 +74,50 @@ export default {
           this.scrollToRow = this.getScrollToRow(direction);
           if (this.scrollToRow) {
             this.scrollToRow.scrollIntoView(this.scrollIntoViewOptions);
-            this.scrollToRow.classList.add('placeholder');
           }
           this.checkDataSize()
-            .then(z => {
-              if (z === true) {
-                this.removeData();
+            .then(isMaxPages => {
+              if (isMaxPages === true) {
+                this.removeData(direction);
               }
             });
         });
     },
     loadNextData: function () {
-      if (this.tableData.length > 49) {
+      if (this.tableData.length > this.pageSize - 1) {
         this.pageNumber++;
-        this.$notify({
-          message: `Page ${this.pageNumber} loaded`,
-          position: 'bottom-right',
-          duration: 2000
-        })
         this.loadData('next');
         window.clearTimeout(this.isScrolling);
       }
     },
     loadPreviousData: function () {
-      this.loadData('previous')
+      if (this.startPage === 1) {
+        this.$notify({
+          title: 'Calm down',
+          message: `You've reached the beginning.`
+        });
+      } else {
+        this.loadData('previous')
+      }
     },
     checkDataSize: async function () {
-      return this.tableData.length > 150;
+      return this.endPage - this.startPage + 1 > this.maxPages;
     },
-    removeData: function () {
-      this.tableData.splice(0, 50);
+    removeData: function (direction) {
+      if (direction === 'next') {
+        this.tableData.splice(0, this.pageSize);
+        if (this.endPage - this.startPage >= 2) {
+          this.startPage++;
+        }
+      }
+      if (direction === 'previous') {
+        this.tableData.splice(this.tableData.length - this.pageSize, this.pageSize);
+        this.startPage--;
+        this.endPage--;
+      }
       this.scrollToRow = this.getScrollToRow();
       if (this.scrollToRow) {
         this.scrollToRow.scrollIntoView(this.scrollIntoViewOptions);
-        this.scrollToRow.classList.add('placeholder');
       }
     },
     getScrollToRow: function (direction) {
@@ -121,7 +126,7 @@ export default {
         return this.rowsInView[0];
       }
       if (direction === 'next') {
-        a = this.rowsInView.length <= 150 ? 50 : 100;
+        a = this.rowsInView.length <= this.pageSize * this.maxPages ? this.pageSize : (this.pageSize * this.maxPages) - this.pageSize;
       }
       if (this.rowsInView.length === 50) {
         a = -1;
