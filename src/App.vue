@@ -1,5 +1,17 @@
 <template>
   <div id="app">
+    <div class="floater">
+      <div class="row">
+        <div>
+          <span>Page Size: </span>
+        <el-input-number v-model="pageLength" @change="changePageSize"></el-input-number>
+        </div>
+        <div>
+          <span>Table Size: </span>
+          {{ tableData.length }}
+        </div>
+      </div>
+    </div>
     <div class="table">
       <el-table :data="tableData" style="width: 100%" stripe>
         <el-table-column prop="firstName" label="First Name"></el-table-column>
@@ -29,14 +41,15 @@ export default {
       startPage: 1,
       endPage: 1,
       pageSize: 50,
-      dataSource: 'https://us-central1-infinite-scroll-vuejs.cloudfunctions.net/getData',
+      dataSource: 'http://localhost:3000/',
       scrollStopDelay: 200,
       offsetDistance: 200,
       scrollIntoViewOptions: {
         behavior: "auto",
         block: "end",
         inline: "start"
-      }
+      },
+      pageLength: 50
     };
   },
   mounted() {
@@ -45,7 +58,7 @@ export default {
   },
   methods: {
     loadData: function(direction) {
-      return fetch(this.dataSource)
+      return fetch(this.dataSource + this.pageLength)
       .then(x => x.json())
       .then(x => {
         if (x.length === 0) {
@@ -55,6 +68,7 @@ export default {
           });
         }
         if (direction === 'initial') {
+          this.tableData.length = 0;
           this.tableData.push(...x);
         }
         if (direction === 'previous') {
@@ -86,11 +100,9 @@ export default {
         });
     },
     loadNextData: function () {
-      if (this.tableData.length > this.pageSize - 1) {
-        this.pageNumber++;
-        this.loadData('next');
-        window.clearTimeout(this.isScrolling);
-      }
+      this.pageNumber++;
+      this.loadData('next');
+      window.clearTimeout(this.isScrolling);
     },
     loadPreviousData: function () {
       if (this.startPage === 1) {
@@ -146,11 +158,16 @@ export default {
             this.loadNextData();
             window.clearTimeout(this.isScrolling);
           }
-          if (document.documentElement.scrollTop === 0) {
+          if (document.documentElement.scrollTop === 40) {
+            console.log(document.documentElement.scrollTop);
             this.loadPreviousData();
           }
         }, this.scrollStopDelay);
       });
+    },
+    changePageSize(value) {
+      this.pageLength = value;
+      this.loadData('initial');
     }
   }
 };
@@ -163,5 +180,25 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+.floater {
+  position: fixed;
+  top: 0px;
+  left: 5px;
+  width: 100%;
+  height: 40px;
+  z-index: 100;
+  background: rgba(255, 255, 255, 1);
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-evenly;
+}
+
+.table {
+  margin-top: 40px;
 }
 </style>

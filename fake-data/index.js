@@ -4,7 +4,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.get('/:dataSize/:pageSize/:pageNumber', (req, res) => {
+app.get('/:dataSize', (req, res) => {
   const arr = [];
   for (let i = 0; i <= req.params.dataSize; i++) {
     const idx = i;
@@ -26,11 +26,8 @@ app.get('/:dataSize/:pageSize/:pageNumber', (req, res) => {
       zipCode: zipCode
     };
   arr.push(data);
-  if (i === +req.params.dataSize) {
-    const beginning = +req.params.pageSize * +req.params.pageNumber - +req.params.pageSize;
-    const ending = +req.params.pageSize * +req.params.pageNumber;
-    const section = arr.slice(beginning, ending);
-    res.send(section);
+  if (i === +req.params.dataSize - 1) {
+    res.send(arr);
   }
   }
 });
