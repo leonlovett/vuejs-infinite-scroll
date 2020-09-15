@@ -41,7 +41,7 @@ export default {
       startPage: 1,
       endPage: 1,
       pageSize: 50,
-      dataSource: 'http://localhost:3000/',
+      dataSource: 'https://api.lovett.media/fakeData/',
       scrollStopDelay: 200,
       offsetDistance: 200,
       scrollIntoViewOptions: {

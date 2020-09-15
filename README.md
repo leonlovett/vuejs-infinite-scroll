@@ -2,9 +2,7 @@
 
 ## Back-End Setup and Start
 ```
-cd fake-data
-npm install
-node index.js
+You will need to install and run this repo:
 ```
 ## Front-End Setup and Start
 ```
