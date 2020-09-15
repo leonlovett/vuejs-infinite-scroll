@@ -2,7 +2,8 @@
 
 ## Back-End Setup and Start
 ```
-You will need to install and run this repo:
+You will need to install and run this repo for the backend:
+https://github.com/leonlovett/fake-data
 ```
 ## Front-End Setup and Start
 ```
